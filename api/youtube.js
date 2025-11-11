@@ -38,17 +38,46 @@ export default async function handler(req, res) {
         if (!videoRes.ok) throw new Error('YouTube Videos API 실패');
         const videoData = await videoRes.json();
 
+        // --- 10번 개선사항(구독자 수)을 위한 추가 API 호출 ---
+        // 3.3. videoData에서 고유한 채널 ID 목록 추출
+        const channelIds = [...new Set(videoData.items.map(item => item.snippet.channelId))];
+        let subscriberMap = new Map();
+
+        if (channelIds.length > 0) {
+            // 3.4. channels.list API 호출 (구독자 수)
+            const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelIds.join(',')}&key=${GCP_API_KEY}`;
+            const channelRes = await fetch(channelUrl);
+            
+            if (channelRes.ok) {
+                const channelData = await channelRes.json();
+                // 3.5. 채널ID를 key, 구독자 수를 value로 하는 Map 생성 (빠른 조회를 위함)
+                channelData.items.forEach(channel => {
+                    subscriberMap.set(channel.id, channel.statistics.subscriberCount);
+                });
+            } else {
+                // 채널 정보 가져오기 실패해도 영상 목록은 반환
+                console.warn('Could not fetch channel statistics.');
+            }
+        }
+        
         // 4. 브라우저가 원하는 '깨끗한' 데이터만 가공하여 전달합니다.
-        const videos = videoData.items.map(item => ({
-            videoId: item.id,
-            title: item.snippet.title,
-            description: item.snippet.description,
-            channelTitle: item.snippet.channelTitle,
-            publishedAt: item.snippet.publishedAt,
-            viewCount: item.statistics.viewCount,
-            likeCount: item.statistics.likeCount,
-            videoUrl: `https://www.youtube.com/watch?v=${item.id}`
-        }));
+        const videos = videoData.items.map(item => {
+            const channelId = item.snippet.channelId;
+            return {
+                videoId: item.id,
+                title: item.snippet.title,
+                description: item.snippet.description,
+                channelTitle: item.snippet.channelTitle,
+                publishedAt: item.snippet.publishedAt,
+                viewCount: item.statistics.viewCount,
+                likeCount: item.statistics.likeCount,
+                videoUrl: `https://www.youtube.com/watch?v=${item.id}`,
+                // 5. 썸네일 정보 추가
+                thumbnail: item.snippet.thumbnails.default.url, 
+                // 10. 구독자 수 정보 추가
+                subscriberCount: subscriberMap.get(channelId) || 0
+            };
+        });
 
         res.status(200).json(videos);
 
