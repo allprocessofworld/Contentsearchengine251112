@@ -37,8 +37,17 @@
             <h2 class="text-xl font-semibold mb-4 text-white">1. YouTube 영상 검색</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <input type="text" id="keywordInput" placeholder="검색 키워드 (예: 스마트팩토리)" class="bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" id="publishedAfterInput" placeholder="업로드 날짜 (YYYY-MM-DD)" onfocus="(this.type='date')" onblur="(this.type='text')" class="bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="number" id="maxResultsInput" placeholder="검색할 영상 수 (최대 50)" value="20" class="bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <!-- 2. '업로드 날짜' 칸을 제거하고 '게시일' 필터 드롭다운으로 변경 -->
+                <select id="dateRangeSelect" class="bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">게시일 (전체)</option>
+                    <option value="7d">최근 1주일</option>
+                    <option value="30d">최근 1개월</option>
+                    <option value="90d">최근 3개월</option>
+                    <option value="180d">최근 6개월</option>
+                    <option value="365d">최근 1년</option>
+                </select>
+                <!-- 1. '최대 개수' 기본값을 50으로 변경 (API 최대치). 100개는 페이지네이션이 필요해 복잡도와 비용이 2배가 되므로 50으로 제한합니다. -->
+                <input type="number" id="maxResultsInput" placeholder="검색할 영상 수 (최대 50)" value="50" max="50" class="bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <button id="searchButton" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
                 검색 실행
@@ -60,11 +69,21 @@
                     <thead class="bg-gray-700 text-gray-300 uppercase text-sm">
                         <tr>
                             <th class="p-3"><input type="checkbox" id="selectAllCheckbox"></th>
-                            <th class="p-3 cursor-pointer" onclick="sortTable(1)">제목</th>
-                            <th class="p-3 cursor-pointer" onclick="sortTable(2)">채널명</th>
-                            <th class="p-3 cursor-pointer" onclick="sortTable(3)">조회수</th>
-                            <th class="p-3 cursor-pointer" onclick="sortTable(4)">게시일</th>
-                            <th class="p-3">링크</th>
+                            <!-- 5. 썸네일 열 추가 (너비 고정) -->
+                            <th class="p-3 w-32">썸네일</th>
+                            <!-- 6. 제목 열 (너비 지정) / 11. 정렬 기능 추가 -->
+                            <th class="p-3 w-1/3 cursor-pointer hover:bg-gray-600" onclick="sortTable(2)">제목 ▼</th>
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(3)">채널명 ▼</th>
+                            <!-- 7. 조회수 열 (너비 지정) / 11. 정렬 기능 추가 -->
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(4)">조회수 ▼</th>
+                            <!-- 10. 구독자 열 추가 (너비 지정) / 11. 정렬 기능 추가 -->
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(5)">구독자 ▼</th>
+                            <!-- 4. 구독자 대비 조회수 '비율' 열 추가 / 11. 정렬 기능 추가 -->
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(6)">비율 (V/S) ▼</th>
+                            <!-- 8. 게시일 열 (너비 지정) / 11. 정렬 기능 추가 -->
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(7)">게시일 ▼</th>
+                            <!-- 9. 링크 열 (너비 지정) -->
+                            <th class="p-3 w-16">링크</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody" class="divide-y divide-gray-700">
@@ -77,12 +96,10 @@
         <!-- 3. 분석 및 섭외 -->
         <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
             <h2 class="text-xl font-semibold mb-4 text-white">3. 주제 분석 및 업체 섭외 리스트</h2>
+            <!-- 12. 두 버튼을 하나로 통합하여 사용자 오류(워크플로우) 개선 -->
             <div class="flex gap-4 mb-4">
-                <button id="analyzeButton" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
-                    선택한 영상 [주제 분석] (AI)
-                </button>
-                <button id="companySearchButton" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
-                    선택한 영상 [업체 검색] (Google)
+                <button id="processSelectedButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
+                    선택 영상 [분석] 및 [업체 검색] 동시 실행
                 </button>
             </div>
             <div class="overflow-x-auto">
@@ -107,13 +124,14 @@
     <script>
         // --- DOM 요소 ---
         const keywordInput = document.getElementById('keywordInput');
-        const publishedAfterInput = document.getElementById('publishedAfterInput');
+        // 2. 'publishedAfterInput' 제거, 'dateRangeSelect' 추가
+        const dateRangeSelect = document.getElementById('dateRangeSelect');
         const maxResultsInput = document.getElementById('maxResultsInput');
         const searchButton = document.getElementById('searchButton');
         const resultsBody = document.getElementById('resultsBody');
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-        const analyzeButton = document.getElementById('analyzeButton');
-        const companySearchButton = document.getElementById('companySearchButton');
+        // 12. 버튼 로직 변경
+        const processSelectedButton = document.getElementById('processSelectedButton');
         const analysisBody = document.getElementById('analysisBody');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const messageBox = document.getElementById('messageBox');
@@ -132,7 +150,15 @@
         // --- 1. YouTube 검색 (Backend API 호출) ---
         searchButton.addEventListener('click', async () => {
             const keyword = keywordInput.value;
-            const publishedAfter = publishedAfterInput.value ? new Date(publishedAfterInput.value).toISOString() : null;
+            // 3. 'dateRangeSelect' 값으로 'publishedAfter' 날짜 계산
+            const dateRange = dateRangeSelect.value;
+            let publishedAfter = null;
+            if (dateRange) {
+                const days = parseInt(dateRange.replace('d', ''));
+                const date = new Date();
+                date.setDate(date.getDate() - days);
+                publishedAfter = date.toISOString();
+            }
             const maxResults = maxResultsInput.value;
 
             if (!keyword) {
@@ -148,6 +174,7 @@
                 const response = await fetch('/api/youtube', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    // 3. 'publishedAfter'를 API로 전송
                     body: JSON.stringify({ keyword, publishedAfter, maxResults })
                 });
 
@@ -183,12 +210,29 @@
                 tr.dataset.videoId = video.videoId;
                 tr.dataset.title = video.title;
                 tr.dataset.description = video.description;
+                // 11. 정렬을 위한 데이터 저장
+                tr.dataset.channel = video.channelTitle;
+                tr.dataset.views = video.viewCount;
+                tr.dataset.subs = video.subscriberCount;
+                tr.dataset.published = video.publishedAt;
                 
+                // 4. 비율 계산
+                const viewCount = parseInt(video.viewCount || 0);
+                const subCount = parseInt(video.subscriberCount || 0);
+                const ratio = subCount > 0 ? (viewCount / subCount) : 0;
+                tr.dataset.ratio = ratio;
+
                 tr.innerHTML = `
                     <td class="p-3"><input type="checkbox" class="result-checkbox bg-gray-600 rounded"></td>
+                    <!-- 5. 썸네일 표시 -->
+                    <td class="p-3"><img src="${video.thumbnail}" alt="Thumbnail" class="w-28 rounded"></td>
                     <td class="p-3">${video.title}</td>
                     <td class="p-3">${video.channelTitle}</td>
-                    <td class="p-3">${parseInt(video.viewCount || 0).toLocaleString()}</td>
+                    <td class="p-3">${viewCount.toLocaleString()}</td>
+                    <!-- 10. 구독자 수 표시 -->
+                    <td class="p-3">${subCount.toLocaleString()}</td>
+                    <!-- 4. 비율 표시 -->
+                    <td class="p-3">${ratio.toFixed(1)}x</td>
                     <td class="p-3">${new Date(video.publishedAt).toLocaleDateString()}</td>
                     <td class="p-3"><a href="${video.videoUrl}" target="_blank" class="text-blue-400 hover:underline">링크</a></td>
                 `;
@@ -203,104 +247,84 @@
             });
         });
 
-        // --- 2. 선택 영상 [주제 분석] (Backend API 호출) ---
-        analyzeButton.addEventListener('click', async () => {
+        // --- 12. 통합 버튼 (분석 + 업체 검색) 로직 ---
+        processSelectedButton.addEventListener('click', async () => {
             const selectedRows = getSelectedRows();
             if (selectedRows.length === 0) {
-                showMessage("먼저 분석할 영상을 선택하세요.", "error");
+                showMessage("먼저 분석할 영상을 1개 이상 선택하세요.", "error");
                 return;
             }
 
             showLoading(true);
             analysisBody.innerHTML = ''; // 분석 테이블 비우기
+            showMessage(`총 ${selectedRows.length}개 항목 분석 및 검색 시작...`);
 
+            // 한 번에 하나씩 순차 처리 (API 과부하 방지)
             for (const row of selectedRows) {
                 const { title, description } = row.dataset;
-                showMessage(`"${title}" 영상 AI 분석 중...`);
-                
+                let analysisData = null;
+                let companyData = null;
+
                 try {
-                    // (중요) Gemini API가 아닌, 우리 자신의 Vercel 백엔드(/api/analyze)로 요청
-                    const response = await fetch('/api/analyze', {
+                    // --- A. AI 주제 분석 ---
+                    showMessage(`[1/2] "${title}" 영상 AI 분석 중...`);
+                    const analyzeResponse = await fetch('/api/analyze', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ text: `제목: ${title}\n설명: ${description}` })
                     });
                     
-                    if (!response.ok) throw new Error('AI 분석 API 호출 실패');
-                    
-                    const data = await response.json(); // { topics: [], industries: [] }
-                    
-                    // 분석 테이블에 행 추가
+                    if (!analyzeResponse.ok) throw new Error('AI 분석 API 호출 실패');
+                    analysisData = await analyzeResponse.json(); // { topics: [], industries: [] }
+
+                    // --- B. 업체 검색 ---
+                    const industryQuery = analysisData.industries[0]; // 첫 번째 업종으로 검색
+                    if (!industryQuery) throw new Error('AI가 분석한 업종이 없습니다.');
+
+                    showMessage(`[2/2] "${industryQuery}" 관련 업체 검색 중...`);
+                    const companyResponse = await fetch('/api/company', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: `${industryQuery} 대한민국 제조 기업` })
+                    });
+
+                    if (!companyResponse.ok) throw new Error('기업 검색 API 호출 실패');
+                    companyData = await companyResponse.json(); // { companies: [] }
+
+                    // --- C. 결과 테이블에 행 추가 ---
                     const analysisTR = document.createElement('tr');
-                    analysisTR.dataset.title = title; // 기업 검색을 위해 저장
-                    analysisTR.dataset.industries = data.industries.join(', '); // 기업 검색을 위해 저장
                     analysisTR.innerHTML = `
                         <td class="p-3">${title}</td>
-                        <td class="p-3">${data.topics.join(', ')}</td>
-                        <td class="p-3">${data.industries.join(', ')}</td>
-                        <td class="p-3" id="company-cell-${row.dataset.videoId}"></td>
+                        <td class="p-3">${analysisData.topics.join(', ')}</td>
+                        <td class="p-3">${analysisData.industries.join(', ')}</td>
+                        <td class="p-3">${formatCompanyList(companyData.companies)}</td>
                     `;
                     analysisBody.appendChild(analysisTR);
                     
                 } catch (error) {
-                    showMessage(`"${title}" 분석 중 오류: ${error.message}`, "error");
+                    // 오류가 발생해도 다음 행은 계속 처리
+                    showMessage(`"${title}" 처리 중 오류: ${error.message}`, "error");
+                    const errorTR = document.createElement('tr');
+                    errorTR.innerHTML = `
+                        <td class="p-3">${title}</td>
+                        <td class="p-3" colspan="3"><span class="text-red-400">오류: ${error.message}</span></td>
+                    `;
+                    analysisBody.appendChild(errorTR);
                 }
             }
-            showMessage("AI 분석 완료.", "success");
+            showMessage("모든 선택 항목 처리 완료.", "success");
             showLoading(false);
         });
 
-        // --- 3. 선택 영상 [업체 검색] (Backend API 호출) ---
-        companySearchButton.addEventListener('click', async () => {
-            // (주의) 이 버튼은 '분석 테이블'에 있는 데이터를 사용합니다.
-            const analysisRows = Array.from(analysisBody.querySelectorAll('tr'));
-            if (analysisRows.length === 0) {
-                showMessage("먼저 [주제 분석]을 실행해야 합니다.", "error");
-                return;
+        // 12. 업체 리스트 포맷팅 헬퍼
+        function formatCompanyList(companies) {
+            if (!companies || companies.length === 0) {
+                return '검색된 기업 없음';
             }
-
-            showLoading(true);
-
-            for (const row of analysisRows) {
-                const industryQuery = row.dataset.industries;
-                const title = row.dataset.title;
-                const videoId = title.replace(/\s/g, '-').substring(0, 10); // 임시 ID
-                
-                if (!industryQuery) continue;
-                
-                showMessage(`"${industryQuery}" 관련 기업 검색 중...`);
-                
-                try {
-                    // (경고) 이메일/전화번호 스크래핑은 불법/불안정하므로 '포기'합니다.
-                    // 대신 'Google Search API'로 기업명과 '홈페이지'만 검색합니다.
-                    // (중요) Google API가 아닌, 우리 자신의 Vercel 백엔드(/api/company)로 요청
-                    const response = await fetch('/api/company', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query: `${industryQuery.split(',')[0]} 대한민국 제조 기업` })
-                    });
-
-                    if (!response.ok) throw new Error('기업 검색 API 호출 실패');
-
-                    const data = await response.json(); // { companies: [] }
-                    const cell = row.querySelector(`td:last-child`); // 마지막 셀
-                    
-                    if (data.companies && data.companies.length > 0) {
-                        cell.innerHTML = data.companies.map(c => 
-                            `<div><a href="${c.link}" target="_blank" class="text-blue-400 hover:underline">${c.title}</a></div>`
-                        ).join('');
-                    } else {
-                        cell.innerHTML = '검색된 기업 없음';
-                    }
-
-                } catch (error) {
-                     showMessage(`"${title}" 기업 검색 중 오류: ${error.message}`, "error");
-                }
-            }
-            showMessage("기업 검색 완료. 수동 연락처 확인이 필요합니다.", "success");
-            showLoading(false);
-        });
-
+            return companies.map(c => 
+                `<div><a href="${c.link}" target="_blank" class="text-blue-400 hover:underline">${c.title}</a></div>`
+            ).join('');
+        }
 
         // --- 헬퍼 함수 ---
         function getSelectedRows() {
@@ -308,12 +332,71 @@
                         .map(cb => cb.closest('tr'));
         }
         
-        // --- 테이블 정렬 (JS 기반) ---
-        function sortTable(n) {
-            // (구현 생략) - 이 부분은 초보자가 구현하기 복잡합니다.
-            // 우선순위에서 제외합니다. 
-            // 10억 연봉 개발자는 핵심 기능(API 연동)에 집중합니다.
-            showMessage(`테이블 ${n}열 정렬 (기능 구현 필요)`);
+        // --- 11. 테이블 정렬 (JS 기반) ---
+        // 정렬 상태를 저장할 변수
+        let sortDirections = {};
+
+        function sortTable(columnIndex) {
+            const tableBody = document.getElementById('resultsBody');
+            const rows = Array.from(tableBody.querySelectorAll('tr'));
+            
+            // 현재 정렬 방향 결정 (기본: 내림차순)
+            const currentDirection = sortDirections[columnIndex] || 'desc';
+            const newDirection = currentDirection === 'desc' ? 'asc' : 'desc';
+            sortDirections[columnIndex] = newDirection;
+
+            // 정렬 기준이 되는 dataset key
+            const keys = [
+                null, // 0. 체크박스
+                null, // 1. 썸네일
+                'title', // 2. 제목
+                'channel', // 3. 채널명
+                'views', // 4. 조회수
+                'subs', // 5. 구독자
+                'ratio', // 6. 비율
+                'published', // 7. 게시일
+                null // 8. 링크
+            ];
+            const sortKey = keys[columnIndex];
+            if (!sortKey) return; // 정렬 불가능한 열
+
+            // 헤더 화살표 업데이트
+            updateSortArrows(columnIndex, newDirection);
+            
+            rows.sort((a, b) => {
+                const aVal = a.dataset[sortKey];
+                const bVal = b.dataset[sortKey];
+
+                let compareVal = 0;
+                
+                // 숫자/날짜 vs 문자열 구분
+                if (sortKey === 'views' || sortKey === 'subs' || sortKey === 'ratio') {
+                    compareVal = parseFloat(aVal) - parseFloat(bVal);
+                } else if (sortKey === 'published') {
+                    compareVal = new Date(aVal) - new Date(bVal);
+                } else {
+                    compareVal = aVal.localeCompare(bVal); // 문자열
+                }
+
+                return newDirection === 'asc' ? compareVal : -compareVal;
+            });
+
+            // 정렬된 행을 다시 삽입
+            tableBody.innerHTML = '';
+            rows.forEach(row => tableBody.appendChild(row));
+        }
+        
+        function updateSortArrows(activeIndex, direction) {
+            const headers = document.querySelectorAll("#resultsTable thead th");
+            headers.forEach((th, index) => {
+                let text = th.textContent.replace(' ▼', '').replace(' ▲', '');
+                if (index === activeIndex) {
+                    text += (direction === 'asc' ? ' ▲' : ' ▼');
+                } else if (th.onclick) {
+                    text += ' ▼'; // 기본값
+                }
+                th.textContent = text;
+            });
         }
 
     </script>
