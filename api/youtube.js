@@ -63,6 +63,11 @@ export default async function handler(req, res) {
         // 4. 브라우저가 원하는 '깨끗한' 데이터만 가공하여 전달합니다.
         const videos = videoData.items.map(item => {
             const channelId = item.snippet.channelId;
+            
+            // 3. 썸네일 해상도 개선 (standard > high > medium > default)
+            const thumbnails = item.snippet.thumbnails;
+            const bestThumbnail = thumbnails.standard || thumbnails.high || thumbnails.medium || thumbnails.default;
+            
             return {
                 videoId: item.id,
                 title: item.snippet.title,
@@ -72,8 +77,8 @@ export default async function handler(req, res) {
                 viewCount: item.statistics.viewCount,
                 likeCount: item.statistics.likeCount,
                 videoUrl: `https://www.youtube.com/watch?v=${item.id}`,
-                // 5. 썸네일 정보 추가
-                thumbnail: item.snippet.thumbnails.default.url, 
+                // 3. 썸네일 정보 추가 (고해상도 URL로 변경)
+                thumbnail: bestThumbnail.url, 
                 // 10. 구독자 수 정보 추가
                 subscriberCount: subscriberMap.get(channelId) || 0
             };
