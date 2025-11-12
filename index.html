@@ -394,7 +394,8 @@
             
             rows.sort((a, b) => {
                 const aVal = a.dataset[sortKey];
-                const bVal = b.dataset[key];
+                // *** BUG FIX (이전 수정 반영됨): 'b.dataset[key]' -> 'b.dataset[sortKey]' ***
+                const bVal = b.dataset[sortKey];
 
                 let compareVal = 0;
                 
