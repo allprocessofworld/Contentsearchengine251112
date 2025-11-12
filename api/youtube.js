@@ -5,88 +5,67 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    // 1. Vercel 환경 변수(보안 금고)에서 API 키를 가져옵니다. (process.env)
-    const GCP_API_KEY = process.env.GCP_API_KEY;
+    // 1. 환경 변수에서 Gemini 키 로드
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    if (!GEMINI_API_KEY) {
+        return res.status(500).json({ error: "GEMINI_API_KEY가 Vercel 환경 변수에 설정되지 않았습니다." });
+    }
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
-    // 2. 브라우저(Frontend)가 보낸 요청 값을 받습니다.
-    const { keyword, publishedAfter, maxResults } = req.body;
+    // 2. 브라우저에서 보낸 텍스트 받기
+    const { text } = req.body;
+    if (!text) {
+        return res.status(400).json({ error: "분석할 텍스트가 없습니다." });
+    }
 
-    // 3. (중요) API Quota Hell을 피하기 위해 필터링을 '단순화'합니다.
-    // 구독자 수, 조회수 필터는 API 호출을 수십 배로 늘리므로 '금지'합니다.
-    // 검색(search.list) -> 상세(videos.list) 2단계 호출로 최적화합니다.
-    
+    // 3. Gemini API에 보낼 프롬프트 (JSON 형식 강제 + 실패 시 응답 정의)
+    const payload = {
+        contents: [{
+            parts: [{
+                text: `당신은 대한민국 산업 다큐멘터리 PD입니다. 다음 영상 정보를 보고, [핵심 주제] 3가지와 [구체적인 산업/업종] 3가지를 추출해주세요. 응답은 반드시 다음 JSON 형식으로만 하십시오. 만약 분석이 불가능하면 {"topics": ["분석 실패"], "industries": ["분석 실패"]} 라고 응답하십시오.\n\n[입력 텍스트]\n${text}`
+            }]
+        }]
+    };
+
     try {
-        // 3.1. search.list (영상 ID 수집)
-        let searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&regionCode=KR&q=${encodeURIComponent(keyword)}&maxResults=${maxResults}&key=${GCP_API_KEY}&videoDuration=long`; // 롱폼 우선
-        if (publishedAfter) {
-            searchUrl += `&publishedAfter=${publishedAfter}`;
-        }
-
-        const searchRes = await fetch(searchUrl);
-        if (!searchRes.ok) throw new Error('YouTube Search API 실패');
-        const searchData = await searchRes.json();
-        
-        if (!searchData.items || searchData.items.length === 0) {
-            return res.status(200).json([]);
-        }
-
-        const videoIds = searchData.items.map(item => item.id.videoId).join(',');
-
-        // 3.2. videos.list (조회수 등 상세 정보 수집)
-        const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds}&key=${GCP_API_KEY}`;
-        const videoRes = await fetch(videoUrl);
-        if (!videoRes.ok) throw new Error('YouTube Videos API 실패');
-        const videoData = await videoRes.json();
-
-        // --- 10번 개선사항(구독자 수)을 위한 추가 API 호출 ---
-        // 3.3. videoData에서 고유한 채널 ID 목록 추출
-        const channelIds = [...new Set(videoData.items.map(item => item.snippet.channelId))];
-        let subscriberMap = new Map();
-
-        if (channelIds.length > 0) {
-            // 3.4. channels.list API 호출 (구독자 수)
-            const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelIds.join(',')}&key=${GCP_API_KEY}`;
-            const channelRes = await fetch(channelUrl);
-            
-            if (channelRes.ok) {
-                const channelData = await channelRes.json();
-                // 3.5. 채널ID를 key, 구독자 수를 value로 하는 Map 생성 (빠른 조회를 위함)
-                channelData.items.forEach(channel => {
-                    subscriberMap.set(channel.id, channel.statistics.subscriberCount);
-                });
-            } else {
-                // 채널 정보 가져오기 실패해도 영상 목록은 반환
-                console.warn('Could not fetch channel statistics.');
-            }
-        }
-        
-        // 4. 브라우저가 원하는 '깨끗한' 데이터만 가공하여 전달합니다.
-        const videos = videoData.items.map(item => {
-            const channelId = item.snippet.channelId;
-            
-            // 3. 썸네일 해상도 개선 (maxres > standard > high > medium > default)
-            const thumbnails = item.snippet.thumbnails;
-            const bestThumbnail = thumbnails.maxres || thumbnails.standard || thumbnails.high || thumbnails.medium || thumbnails.default;
-            
-            return {
-                videoId: item.id,
-                title: item.snippet.title,
-                description: item.snippet.description,
-                channelTitle: item.snippet.channelTitle,
-                publishedAt: item.snippet.publishedAt,
-                viewCount: item.statistics.viewCount,
-                likeCount: item.statistics.likeCount,
-                videoUrl: `https://www.youtube.com/watch?v=${item.id}`,
-                // 3. 썸네일 정보 추가 (고해상도 URL로 변경)
-                thumbnail: bestThumbnail.url, 
-                // 10. 구독자 수 정보 추가
-                subscriberCount: subscriberMap.get(channelId) || 0
-            };
+        const response = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
-        res.status(200).json(videos);
+        if (!response.ok) {
+            // API 키가 잘못되었거나 GCP 프로젝트 설정이 잘못된 경우
+            const errorBody = await response.json();
+            console.error("Gemini API 호출 실패:", errorBody);
+            throw new Error(`Gemini API 호출 실패 (${response.status}): ${errorBody.error?.message || '알 수 없는 오류'}`);
+        }
+
+        const result = await response.json();
+
+        // 7. (오류 수정) Gemini가 응답을 거부했는지 (예: 안전 설정) 확인
+        if (!result.candidates || !result.candidates[0].content || !result.candidates[0].content.parts) {
+            console.error("Gemini API 응답 없음:", result);
+            throw new Error('Gemini API가 유효한 응답을 반환하지 않았습니다. (안전 등급 문제일 수 있음)');
+        }
+        
+        const rawText = result.candidates[0].content.parts[0].text;
+        let parsedData;
+
+        // 7. (오류 수정) AI가 JSON이 아닌 텍스트를 반환할 경우를 대비한 강력한 파싱
+        try {
+            const cleanText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+            parsedData = JSON.parse(cleanText);
+        } catch (parseError) {
+            // 파싱 실패 시, AI가 보낸 원본 텍스트를 로그에 남김
+            console.error("Gemini 응답 JSON 파싱 실패. 원본 텍스트:", rawText);
+            throw new Error('AI가 JSON 형식이 아닌 응답을 반환했습니다.');
+        }
+
+        res.status(200).json(parsedData); // { topics: [...], industries: [...] }
 
     } catch (error) {
+        console.error("api/analyze.js 내부 오류:", error.message);
         res.status(500).json({ error: error.message });
     }
 }
