@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 2. 헤드 타이틀 변경 -->
     <title>허슬플레이 콘텐츠 검색기 (Vr.251112)</title>
-    <!-- 1. Tailwind CSS (CDN) 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 로딩 스피너 스타일 */
@@ -28,22 +26,15 @@
         }
     </style>
 </head>
-<!-- 6. body 테마 변경 (dark -> light) -->
 <body class="bg-white text-gray-900 font-sans">
 
-    <!-- 1. max-w-7xl, mx-auto 제거 -> w-full, p-4 md:p-8 추가 (전체 너비 레이아웃) -->
     <div class="w-full p-4 md:p-8">
-        <!-- 2. 헤드 타이틀 변경 -->
         <h1 class="text-3xl font-bold text-blue-600 mb-6">허슬플레이 콘텐츠 검색기 (Vr.251112)</h1>
 
-        <!-- 6. div 테마 변경 -->
         <div class="bg-gray-100 p-6 rounded-lg shadow-lg mb-8">
-            <!-- 6. h2 색상 변경 -->
             <h2 class="text-xl font-semibold mb-4 text-gray-900">1. YouTube 영상 검색</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- 6. input/select 테마 변경 -->
                 <input type="text" id="keywordInput" placeholder="검색 키워드 (예: 스마트팩토리)" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <!-- 7. '업로드' 텍스트 추가 -->
                 <select id="dateRangeSelect" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">게시일 (전체)</option>
                     <option value="7d">최근 1주일 업로드</option>
@@ -52,14 +43,11 @@
                     <option value="180d">최근 6개월 업로드</option>
                     <option value="365d">최근 1년 업로드</option>
                 </select>
-                <!-- 5. placeholder 텍스트 변경 -->
                 <input type="number" id="maxResultsInput" placeholder="검색 결과 50개" value="50" max="50" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
-            <!-- 3, 4, 6. 클라이언트 측 필터링 UI 추가 -->
             <h3 class="text-lg font-semibold mt-6 mb-4 text-gray-800">검색 후 필터링 (선택 사항)</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- 3. 조회수 필터 -->
                 <select id="viewCountFilter" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="0">조회수 (전체)</option>
                     <option value="100000">10만회 이상</option>
@@ -67,7 +55,6 @@
                     <option value="500000">50만회 이상</option>
                     <option value="1000000">100만회 이상</option>
                 </select>
-                <!-- 4. 구독자수 필터 -->
                 <select id="subscriberFilter" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="-1">구독자수 (전체)</option>
                     <option value="99999">10만명 미만</option>
@@ -75,7 +62,6 @@
                     <option value="500000">50만명 이상</option>
                     <option value="1000000">100만명 이상</option>
                 </select>
-                <!-- 6. 비율 필터 -->
                 <select id="ratioFilter" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="0.0">비율(V/S) (전체)</option>
                     <option value="1.0">1.0x 이상</option>
@@ -87,86 +73,62 @@
                 </select>
             </div>
 
-            <!-- 6. 버튼은 그대로 (파란색 유지) -->
             <button id="searchButton" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
                 검색 실행
             </button>
         </div>
 
-        <!-- 공통 메시지 및 로딩 영역 -->
         <div id="loadingIndicator" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
             <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
-            <!-- 6. 로딩 텍스트 색상 변경 -->
             <p class="text-gray-900 text-lg mt-4 text-center">처리 중...</p>
         </div>
-        <!-- 6. 메시지 박스 테마 변경 -->
         <div id="messageBox" class="hidden p-4 mb-4 text-sm text-yellow-800 bg-yellow-100 border border-yellow-200 rounded-lg" role="alert"></div>
 
-        <!-- 6. div 테마 변경 -->
         <div class="bg-gray-100 p-6 rounded-lg shadow-lg mb-8">
-            <!-- 6. h2 색상 변경 -->
             <h2 class="text-xl font-semibold mb-4 text-gray-900">2. YouTube 검색 결과</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-left" id="resultsTable">
-                    <!-- 6. a. <thead> 테마 변경 -->
                     <thead class="bg-gray-200 text-gray-700 uppercase text-sm">
                         <tr>
                             <th class="p-3"><input type="checkbox" id="selectAllCheckbox" class="w-6 h-6"></th>
-                            <!-- 1. 썸네일 열 w-[300px]로 변경 -->
                             <th class="p-3 w-[300px]">썸네일</th>
-                            <!-- 2. 제목 열 너비 클래스 제거 (자동 늘어남) -->
                             <th class="p-3 cursor-pointer hover:bg-gray-300" onclick="sortTable(2)">제목 ▼</th>
-                            <!-- 1. 채널명 열 w-32 (~128px)로 줄이기 -->
-                            <th class="p-3 w-32 cursor-pointer hover:bg-gray-300" onclick="sortTable(3)">채널명 ▼</th>
-                            <!-- 3. 조회수/구독자/비율 열 w-24로 줄이기 -->
-                            <th class="p-3 w-24 cursor-pointer hover:bg-gray-300" onclick="sortTable(4)">조회수 ▼</th>
-                            <!-- 2. 구독자 열 w-36 (~144px)로 늘리기 (줄바꿈 방지) -->
+                            <th class="p-3 w-40 cursor-pointer hover:bg-gray-300" onclick="sortTable(3)">채널명 ▼</th>
+                            <th class="p-3 w-32 cursor-pointer hover:bg-gray-300" onclick="sortTable(4)">조회수 ▼</th>
                             <th class="p-3 w-36 cursor-pointer hover:bg-gray-300" onclick="sortTable(5)">구독자 ▼</th>
-                            <th class="p-3 w-24 cursor-pointer hover:bg-gray-300" onclick="sortTable(6)">비율 (V/S) ▼</th>
-                            <!-- 4. 게시일 열 w-40로 늘리기 -->
-                            <th class="p-3 w-40 cursor-pointer hover:bg-gray-300" onclick="sortTable(7)">게시일 ▼</th>
+                            <th class="p-3 w-32 cursor-pointer hover:bg-gray-300" onclick="sortTable(6)">비율 (V/S) ▼</th>
+                            <th class="p-3 w-32 cursor-pointer hover:bg-gray-300" onclick="sortTable(7)">게시일 ▼</th>
                             <th class="p-3 w-24">링크</th>
                         </tr>
                     </thead>
-                    <!-- 6. b. <tbody> 테마 변경 -->
                     <tbody id="resultsBody" class="divide-y divide-gray-200">
-                        <!-- JS로 채워짐 -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 6. div 테마 변경 -->
         <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
-            <!-- 6. h2 색상 변경 -->
             <h2 class="text-xl font-semibold mb-4 text-gray-900">3. 주제 분석 및 업체 섭외 리스트</h2>
-            <!-- 12. 두 버튼을 하나로 통합하여 사용자 오류(워크플로우) 개선 -->
             <div class="flex gap-4 mb-4">
                 <button id="processSelectedButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
-                    선택 영상 [분석] 및 [업체 검색] 동시 실행
+                    선택 영상 [핵심 주제 및 소재] 분석
                 </button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left" id="analysisTable">
-                    <!-- 6. c. <thead> 테마 변경 -->
                     <thead class="bg-gray-200 text-gray-700 uppercase text-sm">
                         <tr>
                             <th class="p-3">영상 제목</th>
-                            <th class="p-3">AI 분석 - 핵심 주제</th>
-                            <th class="p-3">AI 분석 - 관련 산업/업종</th>
-                            <th class="p-3">섭외 대상 기업 (Top 5)</th>
+                            <th class="p-3">핵심 주제 및 소재 (AI 분석)</th>
                         </tr>
                     </thead>
-                    <!-- 6. d. <tbody> 테마 변경 -->
                     <tbody id="analysisBody" class="divide-y divide-gray-200">
-                        <!-- JS로 채워짐 -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- 2. Vanilla JavaScript (Client Logic) -->
     <script>
         // --- DOM 요소 ---
         const keywordInput = document.getElementById('keywordInput');
@@ -311,21 +273,14 @@
                 tr.dataset.ratio = ratio;
 
                 tr.innerHTML = `
-                    <!-- 6. 체크박스 테마 변경 -->
                     <td class="p-3"><input type="checkbox" class="result-checkbox bg-gray-200 border-gray-300 rounded w-6 h-6"></td>
-                    <!-- 1. 썸네일 <img> 크기 조정 (w-full, h-auto) -->
                     <td class="p-3"><img src="${video.thumbnail}" alt="Thumbnail" class="w-full h-auto rounded"></td>
-                    <!-- 2. 제목 td에 자동 줄바꿈 클래스 추가 -->
                     <td class="p-3 whitespace-normal">${video.title}</td>
                     <td class="p-3">${video.channelTitle}</td>
-                    <!-- 5. 조회수 '회' 추가 -->
                     <td class="p-3">${viewCount.toLocaleString()}회</td>
-                    <!-- 6. 구독자 '명' 추가 -->
                     <td class="p-3">${subCount.toLocaleString()}명</td>
-                    <!-- 4. 비율 표시 -->
                     <td class="p-3">${ratio.toFixed(1)}x</td>
                     <td class="p-3">${new Date(video.publishedAt).toLocaleDateString()}</td>
-                    <!-- 4. 링크 td에 너비 w-24, 색상 변경 -->
                     <td class="p-3 w-24"><a href="${video.videoUrl}" target="_blank" class="text-blue-600 hover:underline">링크</a></td>
                 `;
                 resultsBody.appendChild(tr);
@@ -339,7 +294,7 @@
             });
         });
 
-        // --- 12. 통합 버튼 (분석 + 업체 검색) 로직 ---
+        // --- 2. [핵심 주제 및 소재] 분석 로직 (단순화) ---
         processSelectedButton.addEventListener('click', async () => {
             const selectedRows = getSelectedRows();
             if (selectedRows.length === 0) {
@@ -349,18 +304,16 @@
 
             showLoading(true);
             analysisBody.innerHTML = ''; // 분석 테이블 비우기
-            showMessage(`총 ${selectedRows.length}개 항목 분석 및 검색 시작...`);
+            showMessage(`총 ${selectedRows.length}개 항목 분석 시작...`);
 
             // 한 번에 하나씩 순차 처리 (API 과부하 방지)
             for (const row of selectedRows) {
-                // *** 1. BUG FIX: 여분의 '}' 기호 제거 ***
                 const { title, description } = row.dataset; 
                 let analysisData = null;
-                let companyData = null;
 
                 try {
                     // --- A. AI 주제 분석 ---
-                    showMessage(`[1/2] "${title}" 영상 AI 분석 중...`);
+                    showMessage(`"${title}" 영상 AI 분석 중...`);
                     const analyzeResponse = await fetch('/api/analyze', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -368,53 +321,26 @@
                     });
                     
                     if (!analyzeResponse.ok) {
-                        // 7. 오류가 발생하면, 서버가 보낸 JSON 오류 메시지를
-                        // 'throw'하여 catch 블록으로 보냅니다.
                         const err = await analyzeResponse.json();
                         throw new Error(err.error || 'AI 분석 API 호출 실패');
                     }
-                    analysisData = await analyzeResponse.json(); // { topics: [], industries: [] }
-
-                    // --- B. 업체 검색 ---
-                    // 7. analysisData가 유효한지, industries가 있는지 확인
-                    if (!analysisData.industries || analysisData.industries.length === 0 || analysisData.industries[0] === '분석 실패') {
-                        throw new Error('AI가 유효한 업종을 반환하지 못했습니다.');
-                    }
-
-                    const industryQuery = analysisData.industries[0]; // 첫 번째 업종으로 검색
-                    showMessage(`[2/2] "${industryQuery}" 관련 업체 검색 중...`);
-                    
-                    const companyResponse = await fetch('/api/company', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query: `${industryQuery} 대한민국 제조 기업` })
-                    });
-
-                    if (!companyResponse.ok) {
-                        const err = await companyResponse.json();
-                        throw new Error(err.error || '기업 검색 API 호출 실패');
-                    }
-                    companyData = await companyResponse.json(); // { companies: [] }
+                    analysisData = await analyzeResponse.json(); // { topic_material: "..." }
 
                     // --- C. 결과 테이블에 행 추가 ---
                     const analysisTR = document.createElement('tr');
                     analysisTR.innerHTML = `
                         <td class="p-3">${title}</td>
-                        <td class="p-3">${analysisData.topics.join(', ')}</td>
-                        <td class="p-3">${analysisData.industries.join(', ')}</td>
-                        <td class="p-3">${formatCompanyList(companyData.companies)}</td>
+                        <td class="p-3">${analysisData.topic_material}</td>
                     `;
                     analysisBody.appendChild(analysisTR);
                     
                 } catch (error) {
                     // 오류가 발생해도 다음 행은 계속 처리
-                    // 7. 오류 메시지를 'error.message'로 명확하게 표시
                     showMessage(`"${title}" 처리 중 오류: ${error.message}`, "error");
                     const errorTR = document.createElement('tr');
                     errorTR.innerHTML = `
                         <td class="p-3">${title}</td>
-                        <!-- 6. 오류 텍스트 색상 변경 -->
-                        <td class="p-3" colspan="3"><span class="text-red-600">오류: ${error.message}</span></td>
+                        <td class="p-3"><span class="text-red-600">오류: ${error.message}</span></td>
                     `;
                     analysisBody.appendChild(errorTR);
                 }
@@ -423,16 +349,7 @@
             showLoading(false);
         });
 
-        // 12. 업체 리스트 포맷팅 헬퍼
-        function formatCompanyList(companies) {
-            if (!companies || companies.length === 0) {
-                return '검색된 기업 없음';
-            }
-            return companies.map(c => 
-                /* 6. 링크 색상 변경 */
-                `<div><a href="${c.link}" target="_blank" class="text-blue-600 hover:underline">${c.title}</a></div>`
-            ).join('');
-        }
+        // 12. 업체 리스트 포맷팅 헬퍼 (제거됨)
 
         // --- 헬퍼 함수 ---
         function getSelectedRows() {
@@ -473,7 +390,6 @@
             
             rows.sort((a, b) => {
                 const aVal = a.dataset[sortKey];
-                // *** BUG FIX (이전 수정 반영됨): 'b.dataset[key]' -> 'b.dataset[sortKey]' ***
                 const bVal = b.dataset[sortKey];
 
                 let compareVal = 0;
