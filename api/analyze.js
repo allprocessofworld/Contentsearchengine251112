@@ -11,8 +11,10 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "GEMINI_API_KEY가 Vercel 환경 변수에 설정되지 않았습니다." });
     }
     
-    // *** 1. (BUG FIX) 'gemini-pro' -> 'gemini-1.5-flash-latest'로 모델명 변경 ***
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+    // *** 1. (BUG FIX 2) 'gemini-1.5-flash-latest' -> 'gemini-1.5-pro-latest'로 모델명 변경 ***
+    // Google API에서 'gemini-1.5-flash-latest' 모델을 v1beta 엔드포인트에서 찾지 못하고 있습니다.
+    // 더 표준적인 최신 'pro' 모델로 다시 변경합니다.
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
     // 2. 브라우저에서 보낸 텍스트 받기
     const { text } = req.body;
