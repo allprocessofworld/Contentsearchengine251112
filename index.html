@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>산업 다큐 리서치 툴</title>
+    <!-- 2. 헤드 타이틀 변경 -->
+    <title>허슬플레이 콘텐츠 검색기 (Vr.251112)</title>
     <!-- 1. Tailwind CSS (CDN) 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -32,8 +33,8 @@
 
     <!-- 1. max-w-7xl, mx-auto 제거 -> w-full, p-4 md:p-8 추가 (전체 너비 레이아웃) -->
     <div class="w-full p-4 md:p-8">
-        <!-- 6. h1 색상 변경 -->
-        <h1 class="text-3xl font-bold text-blue-600 mb-6">🏭 산업 다큐 리서치 툴 (Web Program Ver.)</h1>
+        <!-- 2. 헤드 타이틀 변경 -->
+        <h1 class="text-3xl font-bold text-blue-600 mb-6">허슬플레이 콘텐츠 검색기 (Vr.251112)</h1>
 
         <!-- 6. div 테마 변경 -->
         <div class="bg-gray-100 p-6 rounded-lg shadow-lg mb-8">
@@ -352,7 +353,8 @@
 
             // 한 번에 하나씩 순차 처리 (API 과부하 방지)
             for (const row of selectedRows) {
-                const { title, description } } = row.dataset;
+                // *** 1. BUG FIX: 여분의 '}' 기호 제거 ***
+                const { title, description } = row.dataset; 
                 let analysisData = null;
                 let companyData = null;
 
