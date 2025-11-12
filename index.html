@@ -77,17 +77,17 @@
                     <thead class="bg-gray-200 text-gray-700 uppercase text-sm">
                         <tr>
                             <th class="p-3"><input type="checkbox" id="selectAllCheckbox" class="w-6 h-6"></th>
-                            <!-- 1. 썸네일 열 (예시처럼) w-40 (~160px) 설정 -->
-                            <th class="p-3 w-40">썸네일</th>
-                            <!-- 2. 제목 열 너비 (flex-1)로 변경 (w-1/3 제거) -->
+                            <!-- 1. 썸네일 열 w-[300px]로 변경 -->
+                            <th class="p-3 w-[300px]">썸네일</th>
+                            <!-- 2. 제목 열 너비 클래스 제거 (자동 늘어남) -->
                             <th class="p-3 cursor-pointer hover:bg-gray-300" onclick="sortTable(2)">제목 ▼</th>
                             <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(3)">채널명 ▼</th>
-                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(4)">조회수 ▼</th>
-                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(5)">구독자 ▼</th>
-                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(6)">비율 (V/S) ▼</th>
-                            <!-- 3. 게시일 열 너비 조정 (w-40 -> w-32) -->
-                            <th class="p-3 w-32 cursor-pointer hover:bg-gray-300" onclick="sortTable(7)">게시일 ▼</th>
-                            <!-- 4. 링크 열 너비 유지 (w-24) -->
+                            <!-- 3. 조회수/구독자/비율 열 w-24로 줄이기 -->
+                            <th class="p-3 w-24 cursor-pointer hover:bg-gray-300" onclick="sortTable(4)">조회수 ▼</th>
+                            <th class="p-3 w-24 cursor-pointer hover:bg-gray-300" onclick="sortTable(5)">구독자 ▼</th>
+                            <th class="p-3 w-24 cursor-pointer hover:bg-gray-300" onclick="sortTable(6)">비율 (V/S) ▼</th>
+                            <!-- 4. 게시일 열 w-40로 늘리기 -->
+                            <th class="p-3 w-40 cursor-pointer hover:bg-gray-300" onclick="sortTable(7)">게시일 ▼</th>
                             <th class="p-3 w-24">링크</th>
                         </tr>
                     </thead>
@@ -240,9 +240,10 @@
                     <!-- 2. 제목 td에 자동 줄바꿈 클래스 추가 -->
                     <td class="p-3 whitespace-normal">${video.title}</td>
                     <td class="p-3">${video.channelTitle}</td>
-                    <td class="p-3">${viewCount.toLocaleString()}</td>
-                    <!-- 10. 구독자 수 표시 -->
-                    <td class="p-3">${subCount.toLocaleString()}</td>
+                    <!-- 5. 조회수 '회' 추가 -->
+                    <td class="p-3">${viewCount.toLocaleString()}회</td>
+                    <!-- 6. 구독자 '명' 추가 -->
+                    <td class="p-3">${subCount.toLocaleString()}명</td>
                     <!-- 4. 비율 표시 -->
                     <td class="p-3">${ratio.toFixed(1)}x</td>
                     <td class="p-3">${new Date(video.publishedAt).toLocaleDateString()}</td>
@@ -287,21 +288,33 @@
                         body: JSON.stringify({ text: `제목: ${title}\n설명: ${description}` })
                     });
                     
-                    if (!analyzeResponse.ok) throw new Error('AI 분석 API 호출 실패');
+                    if (!analyzeResponse.ok) {
+                        // 7. 오류가 발생하면, 서버가 보낸 JSON 오류 메시지를
+                        // 'throw'하여 catch 블록으로 보냅니다.
+                        const err = await analyzeResponse.json();
+                        throw new Error(err.error || 'AI 분석 API 호출 실패');
+                    }
                     analysisData = await analyzeResponse.json(); // { topics: [], industries: [] }
 
                     // --- B. 업체 검색 ---
-                    const industryQuery = analysisData.industries[0]; // 첫 번째 업종으로 검색
-                    if (!industryQuery) throw new Error('AI가 분석한 업종이 없습니다.');
+                    // 7. analysisData가 유효한지, industries가 있는지 확인
+                    if (!analysisData.industries || analysisData.industries.length === 0 || analysisData.industries[0] === '분석 실패') {
+                        throw new Error('AI가 유효한 업종을 반환하지 못했습니다.');
+                    }
 
+                    const industryQuery = analysisData.industries[0]; // 첫 번째 업종으로 검색
                     showMessage(`[2/2] "${industryQuery}" 관련 업체 검색 중...`);
+                    
                     const companyResponse = await fetch('/api/company', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ query: `${industryQuery} 대한민국 제조 기업` })
                     });
 
-                    if (!companyResponse.ok) throw new Error('기업 검색 API 호출 실패');
+                    if (!companyResponse.ok) {
+                        const err = await companyResponse.json();
+                        throw new Error(err.error || '기업 검색 API 호출 실패');
+                    }
                     companyData = await companyResponse.json(); // { companies: [] }
 
                     // --- C. 결과 테이블에 행 추가 ---
@@ -316,6 +329,7 @@
                     
                 } catch (error) {
                     // 오류가 발생해도 다음 행은 계속 처리
+                    // 7. 오류 메시지를 'error.message'로 명확하게 표시
                     showMessage(`"${title}" 처리 중 오류: ${error.message}`, "error");
                     const errorTR = document.createElement('tr');
                     errorTR.innerHTML = `
@@ -380,7 +394,7 @@
             
             rows.sort((a, b) => {
                 const aVal = a.dataset[sortKey];
-                const bVal = b.dataset[sortKey];
+                const bVal = b.dataset[key];
 
                 let compareVal = 0;
                 
