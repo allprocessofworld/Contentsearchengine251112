@@ -42,18 +42,52 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- 6. input/select 테마 변경 -->
                 <input type="text" id="keywordInput" placeholder="검색 키워드 (예: 스마트팩토리)" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <!-- 7. '업로드' 텍스트 추가 -->
                 <select id="dateRangeSelect" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">게시일 (전체)</option>
-                    <option value="7d">최근 1주일</option>
-                    <option value="30d">최근 1개월</option>
-                    <option value="90d">최근 3개월</option>
-                    <option value="180d">최근 6개월</option>
-                    <option value="365d">최근 1년</option>
+                    <option value="7d">최근 1주일 업로드</option>
+                    <option value="30d">최근 1개월 업로드</option>
+                    <option value="90d">최근 3개월 업로드</option>
+                    <option value="180d">최근 6개월 업로드</option>
+                    <option value="365d">최근 1년 업로드</option>
                 </select>
-                <input type="number" id="maxResultsInput" placeholder="검색할 영상 수 (최대 50)" value="50" max="50" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <!-- 5. placeholder 텍스트 변경 -->
+                <input type="number" id="maxResultsInput" placeholder="검색 결과 50개" value="50" max="50" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
+
+            <!-- 3, 4, 6. 클라이언트 측 필터링 UI 추가 -->
+            <h3 class="text-lg font-semibold mt-6 mb-4 text-gray-800">검색 후 필터링 (선택 사항)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 3. 조회수 필터 -->
+                <select id="viewCountFilter" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="0">조회수 (전체)</option>
+                    <option value="100000">10만회 이상</option>
+                    <option value="300000">30만회 이상</option>
+                    <option value="500000">50만회 이상</option>
+                    <option value="1000000">100만회 이상</option>
+                </select>
+                <!-- 4. 구독자수 필터 -->
+                <select id="subscriberFilter" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="-1">구독자수 (전체)</option>
+                    <option value="99999">10만명 미만</option>
+                    <option value="100000">10만명 이상</option>
+                    <option value="500000">50만명 이상</option>
+                    <option value="1000000">100만명 이상</option>
+                </select>
+                <!-- 6. 비율 필터 -->
+                <select id="ratioFilter" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="0.0">비율(V/S) (전체)</option>
+                    <option value="1.0">1.0x 이상</option>
+                    <option value="2.0">2.0x 이상</option>
+                    <option value="5.0">5.0x 이상</option>
+                    <option value="10.0">10.0x 이상</option>
+                    <option value="50.0">50.0x 이상</option>
+                    <option value="100.0">100.0x 이상</option>
+                </select>
+            </div>
+
             <!-- 6. 버튼은 그대로 (파란색 유지) -->
-            <button id="searchButton" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
+            <button id="searchButton" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
                 검색 실행
             </button>
         </div>
@@ -81,10 +115,12 @@
                             <th class="p-3 w-[300px]">썸네일</th>
                             <!-- 2. 제목 열 너비 클래스 제거 (자동 늘어남) -->
                             <th class="p-3 cursor-pointer hover:bg-gray-300" onclick="sortTable(2)">제목 ▼</th>
-                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(3)">채널명 ▼</th>
+                            <!-- 1. 채널명 열 w-32 (~128px)로 줄이기 -->
+                            <th class="p-3 w-32 cursor-pointer hover:bg-gray-300" onclick="sortTable(3)">채널명 ▼</th>
                             <!-- 3. 조회수/구독자/비율 열 w-24로 줄이기 -->
                             <th class="p-3 w-24 cursor-pointer hover:bg-gray-300" onclick="sortTable(4)">조회수 ▼</th>
-                            <th class="p-3 w-24 cursor-pointer hover:bg-gray-300" onclick="sortTable(5)">구독자 ▼</th>
+                            <!-- 2. 구독자 열 w-36 (~144px)로 늘리기 (줄바꿈 방지) -->
+                            <th class="p-3 w-36 cursor-pointer hover:bg-gray-300" onclick="sortTable(5)">구독자 ▼</th>
                             <th class="p-3 w-24 cursor-pointer hover:bg-gray-300" onclick="sortTable(6)">비율 (V/S) ▼</th>
                             <!-- 4. 게시일 열 w-40로 늘리기 -->
                             <th class="p-3 w-40 cursor-pointer hover:bg-gray-300" onclick="sortTable(7)">게시일 ▼</th>
@@ -136,6 +172,12 @@
         // 2. 'publishedAfterInput' 제거, 'dateRangeSelect' 추가
         const dateRangeSelect = document.getElementById('dateRangeSelect');
         const maxResultsInput = document.getElementById('maxResultsInput');
+        
+        // 3, 4, 6. 필터 DOM 요소 추가
+        const viewCountFilter = document.getElementById('viewCountFilter');
+        const subscriberFilter = document.getElementById('subscriberFilter');
+        const ratioFilter = document.getElementById('ratioFilter');
+        
         const searchButton = document.getElementById('searchButton');
         const resultsBody = document.getElementById('resultsBody');
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');
@@ -175,6 +217,13 @@
                 return;
             }
 
+            // 3, 4, 6. 필터 값 읽기
+            const filters = {
+                viewCount: parseInt(viewCountFilter.value),
+                subscriberCount: parseInt(subscriberFilter.value),
+                ratio: parseFloat(ratioFilter.value)
+            };
+
             showLoading(true);
             showMessage("YouTube API 호출 중...", "info");
 
@@ -194,12 +243,8 @@
 
                 const videos = await response.json();
                 
-                // (경고) 요청하신 복잡한 필터(구독자, 숏폼/롱폼)는 API 할당량(Quota)을 
-                // 폭발시키므로 의도적으로 '제외'했습니다. 
-                // 대신, 가져온 데이터를 HTML 테이블에서 '정렬'하는 기능으로 대체합니다.
-                
-                displayResults(videos);
-                showMessage("검색 완료.", "success");
+                // 3, 4, 6. 클라이언트 측 필터링 후 결과 표시
+                displayResults(videos, filters);
 
             } catch (error) {
                 showMessage(`오류 발생: ${error.message}`, "error");
@@ -208,10 +253,42 @@
             }
         });
 
-        // --- 1.2. 검색 결과 표시 ---
-        function displayResults(videos) {
+        // --- 1.2. 검색 결과 표시 (필터링 로직 추가) ---
+        function displayResults(videos, filters) {
             resultsBody.innerHTML = ''; // 테이블 비우기
-            videos.forEach(video => {
+
+            // 3, 4, 6. 클라이언트 측 필터링 로직
+            const filteredVideos = videos.filter(video => {
+                const viewCount = parseInt(video.viewCount || 0);
+                const subCount = parseInt(video.subscriberCount || 0);
+                const ratio = subCount > 0 ? (viewCount / subCount) : 0;
+
+                // 3. 조회수 필터
+                if (viewCount < filters.viewCount) {
+                    return false;
+                }
+                
+                // 4. 구독자수 필터
+                if (filters.subscriberCount !== -1) { // -1은 '전체'
+                    if (filters.subscriberCount === 99999) { // 10만 미만
+                        if (subCount >= 100000) return false;
+                    } else { // 10만 이상, 50만 이상...
+                        if (subCount < filters.subscriberCount) return false;
+                    }
+                }
+                
+                // 6. 비율 필터
+                if (ratio < filters.ratio) {
+                    return false;
+                }
+
+                return true; // 모든 필터 통과
+            });
+            
+            // 필터링된 결과 메시지
+            showMessage(`검색 완료. 총 ${videos.length}개 중 ${filteredVideos.length}개 표시.`, "success");
+
+            filteredVideos.forEach(video => {
                 const tr = document.createElement('tr');
                 // 6. hover 색상 변경
                 tr.classList.add('hover:bg-gray-100');
@@ -275,7 +352,7 @@
 
             // 한 번에 하나씩 순차 처리 (API 과부하 방지)
             for (const row of selectedRows) {
-                const { title, description } = row.dataset;
+                const { title, description } } = row.dataset;
                 let analysisData = null;
                 let companyData = null;
 
