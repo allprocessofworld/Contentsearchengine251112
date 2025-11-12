@@ -21,26 +21,28 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* 테이블 셀이 깨지지 않도록 */
+        /* 2. 테이블 셀이 단어 단위로 줄바꿈되도록 수정 */
         td {
-            word-break: break-all;
+            overflow-wrap: break-word;
         }
     </style>
 </head>
-<!-- 1. body에서 좌우 여백(p-4 md:p-8) 제거 -->
-<body class="bg-gray-900 text-gray-100 font-sans">
+<!-- 6. body 테마 변경 (dark -> light) -->
+<body class="bg-white text-gray-900 font-sans">
 
     <!-- 1. max-w-7xl, mx-auto 제거 -> w-full, p-4 md:p-8 추가 (전체 너비 레이아웃) -->
     <div class="w-full p-4 md:p-8">
-        <h1 class="text-3xl font-bold text-blue-400 mb-6">🏭 산업 다큐 리서치 툴 (Web Program Ver.)</h1>
+        <!-- 6. h1 색상 변경 -->
+        <h1 class="text-3xl font-bold text-blue-600 mb-6">🏭 산업 다큐 리서치 툴 (Web Program Ver.)</h1>
 
-        <!-- 1. 검색 영역 (이제 부모 div의 padding을 따름) -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
-            <h2 class="text-xl font-semibold mb-4 text-white">1. YouTube 영상 검색</h2>
+        <!-- 6. div 테마 변경 -->
+        <div class="bg-gray-100 p-6 rounded-lg shadow-lg mb-8">
+            <!-- 6. h2 색상 변경 -->
+            <h2 class="text-xl font-semibold mb-4 text-gray-900">1. YouTube 영상 검색</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" id="keywordInput" placeholder="검색 키워드 (예: 스마트팩토리)" class="bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <!-- 2. '업로드 날짜' 칸을 제거하고 '게시일' 필터 드롭다운으로 변경 -->
-                <select id="dateRangeSelect" class="bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <!-- 6. input/select 테마 변경 -->
+                <input type="text" id="keywordInput" placeholder="검색 키워드 (예: 스마트팩토리)" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="dateRangeSelect" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">게시일 (전체)</option>
                     <option value="7d">최근 1주일</option>
                     <option value="30d">최근 1개월</option>
@@ -48,9 +50,9 @@
                     <option value="180d">최근 6개월</option>
                     <option value="365d">최근 1년</option>
                 </select>
-                <!-- 2. '최대 개수' 100개 요청은 API 한계(50) 및 비용 문제로 '거부'. 50개 유지. -->
-                <input type="number" id="maxResultsInput" placeholder="검색할 영상 수 (최대 50)" value="50" max="50" class="bg-gray-700 text-white p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="number" id="maxResultsInput" placeholder="검색할 영상 수 (최대 50)" value="50" max="50" class="bg-white text-gray-900 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
+            <!-- 6. 버튼은 그대로 (파란색 유지) -->
             <button id="searchButton" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
                 검색 실행
             </button>
@@ -59,42 +61,48 @@
         <!-- 공통 메시지 및 로딩 영역 -->
         <div id="loadingIndicator" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
             <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
-            <p class="text-white text-lg mt-4 text-center">처리 중...</p>
+            <!-- 6. 로딩 텍스트 색상 변경 -->
+            <p class="text-gray-900 text-lg mt-4 text-center">처리 중...</p>
         </div>
-        <div id="messageBox" class="hidden p-4 mb-4 text-sm text-yellow-300 bg-yellow-900 rounded-lg" role="alert"></div>
+        <!-- 6. 메시지 박스 테마 변경 -->
+        <div id="messageBox" class="hidden p-4 mb-4 text-sm text-yellow-800 bg-yellow-100 border border-yellow-200 rounded-lg" role="alert"></div>
 
-        <!-- 2. 유튜브 검색 결과 -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
-            <h2 class="text-xl font-semibold mb-4 text-white">2. YouTube 검색 결과</h2>
+        <!-- 6. div 테마 변경 -->
+        <div class="bg-gray-100 p-6 rounded-lg shadow-lg mb-8">
+            <!-- 6. h2 색상 변경 -->
+            <h2 class="text-xl font-semibold mb-4 text-gray-900">2. YouTube 검색 결과</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-left" id="resultsTable">
-                    <thead class="bg-gray-700 text-gray-300 uppercase text-sm">
+                    <!-- 6. a. <thead> 테마 변경 -->
+                    <thead class="bg-gray-200 text-gray-700 uppercase text-sm">
                         <tr>
-                            <!-- 4. 체크박스 크기 키우기 (w-6 h-6 추가) -->
                             <th class="p-3"><input type="checkbox" id="selectAllCheckbox" class="w-6 h-6"></th>
-                            <!-- 3. 썸네일 열 너비 키우기 (w-64) -->
-                            <th class="p-3 w-64">썸네일</th>
-                            <th class="p-3 w-1/3 cursor-pointer hover:bg-gray-600" onclick="sortTable(2)">제목 ▼</th>
-                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(3)">채널명 ▼</th>
-                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(4)">조회수 ▼</th>
-                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(5)">구독자 ▼</th>
-                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-600" onclick="sortTable(6)">비율 (V/S) ▼</th>
-                            <!-- 5. 게시일 열 너비 키우기 (w-40) -->
-                            <th class="p-3 w-40 cursor-pointer hover:bg-gray-600" onclick="sortTable(7)">게시일 ▼</th>
-                            <!-- 6. 링크 열 너비 키우기 (w-24) -->
+                            <!-- 1. 썸네일 열 (예시처럼) w-40 (~160px) 설정 -->
+                            <th class="p-3 w-40">썸네일</th>
+                            <!-- 2. 제목 열 너비 (flex-1)로 변경 (w-1/3 제거) -->
+                            <th class="p-3 cursor-pointer hover:bg-gray-300" onclick="sortTable(2)">제목 ▼</th>
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(3)">채널명 ▼</th>
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(4)">조회수 ▼</th>
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(5)">구독자 ▼</th>
+                            <th class="p-3 w-1/6 cursor-pointer hover:bg-gray-300" onclick="sortTable(6)">비율 (V/S) ▼</th>
+                            <!-- 3. 게시일 열 너비 조정 (w-40 -> w-32) -->
+                            <th class="p-3 w-32 cursor-pointer hover:bg-gray-300" onclick="sortTable(7)">게시일 ▼</th>
+                            <!-- 4. 링크 열 너비 유지 (w-24) -->
                             <th class="p-3 w-24">링크</th>
                         </tr>
                     </thead>
-                    <tbody id="resultsBody" class="divide-y divide-gray-700">
+                    <!-- 6. b. <tbody> 테마 변경 -->
+                    <tbody id="resultsBody" class="divide-y divide-gray-200">
                         <!-- JS로 채워짐 -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 3. 분석 및 섭외 -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 text-white">3. 주제 분석 및 업체 섭외 리스트</h2>
+        <!-- 6. div 테마 변경 -->
+        <div class="bg-gray-100 p-6 rounded-lg shadow-lg">
+            <!-- 6. h2 색상 변경 -->
+            <h2 class="text-xl font-semibold mb-4 text-gray-900">3. 주제 분석 및 업체 섭외 리스트</h2>
             <!-- 12. 두 버튼을 하나로 통합하여 사용자 오류(워크플로우) 개선 -->
             <div class="flex gap-4 mb-4">
                 <button id="processSelectedButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-300">
@@ -103,7 +111,8 @@
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left" id="analysisTable">
-                    <thead class="bg-gray-700 text-gray-300 uppercase text-sm">
+                    <!-- 6. c. <thead> 테마 변경 -->
+                    <thead class="bg-gray-200 text-gray-700 uppercase text-sm">
                         <tr>
                             <th class="p-3">영상 제목</th>
                             <th class="p-3">AI 분석 - 핵심 주제</th>
@@ -111,7 +120,8 @@
                             <th class="p-3">섭외 대상 기업 (Top 5)</th>
                         </tr>
                     </thead>
-                    <tbody id="analysisBody" class="divide-y divide-gray-700">
+                    <!-- 6. d. <tbody> 테마 변경 -->
+                    <tbody id="analysisBody" class="divide-y divide-gray-200">
                         <!-- JS로 채워짐 -->
                     </tbody>
                 </table>
@@ -203,7 +213,8 @@
             resultsBody.innerHTML = ''; // 테이블 비우기
             videos.forEach(video => {
                 const tr = document.createElement('tr');
-                tr.classList.add('hover:bg-gray-700');
+                // 6. hover 색상 변경
+                tr.classList.add('hover:bg-gray-100');
                 
                 // 데이터를 tr의 dataset에 저장 (나중에 분석용)
                 tr.dataset.videoId = video.videoId;
@@ -222,11 +233,12 @@
                 tr.dataset.ratio = ratio;
 
                 tr.innerHTML = `
-                    <!-- 4. 체크박스 크기 키우기 (w-6 h-6 추가) -->
-                    <td class="p-3"><input type="checkbox" class="result-checkbox bg-gray-600 rounded w-6 h-6"></td>
-                    <!-- 3. 썸네일 이미지 크기 키우기 (w-64, h-auto 추가) -->
-                    <td class="p-3"><img src="${video.thumbnail}" alt="Thumbnail" class="w-64 h-auto rounded"></td>
-                    <td class="p-3">${video.title}</td>
+                    <!-- 6. 체크박스 테마 변경 -->
+                    <td class="p-3"><input type="checkbox" class="result-checkbox bg-gray-200 border-gray-300 rounded w-6 h-6"></td>
+                    <!-- 1. 썸네일 <img> 크기 조정 (w-full, h-auto) -->
+                    <td class="p-3"><img src="${video.thumbnail}" alt="Thumbnail" class="w-full h-auto rounded"></td>
+                    <!-- 2. 제목 td에 자동 줄바꿈 클래스 추가 -->
+                    <td class="p-3 whitespace-normal">${video.title}</td>
                     <td class="p-3">${video.channelTitle}</td>
                     <td class="p-3">${viewCount.toLocaleString()}</td>
                     <!-- 10. 구독자 수 표시 -->
@@ -234,8 +246,8 @@
                     <!-- 4. 비율 표시 -->
                     <td class="p-3">${ratio.toFixed(1)}x</td>
                     <td class="p-3">${new Date(video.publishedAt).toLocaleDateString()}</td>
-                    <!-- 6. 링크 td에 너비 w-24 추가 -->
-                    <td class="p-3 w-24"><a href="${video.videoUrl}" target="_blank" class="text-blue-400 hover:underline">링크</a></td>
+                    <!-- 4. 링크 td에 너비 w-24, 색상 변경 -->
+                    <td class="p-3 w-24"><a href="${video.videoUrl}" target="_blank" class="text-blue-600 hover:underline">링크</a></td>
                 `;
                 resultsBody.appendChild(tr);
             });
@@ -308,7 +320,8 @@
                     const errorTR = document.createElement('tr');
                     errorTR.innerHTML = `
                         <td class="p-3">${title}</td>
-                        <td class="p-3" colspan="3"><span class="text-red-400">오류: ${error.message}</span></td>
+                        <!-- 6. 오류 텍스트 색상 변경 -->
+                        <td class="p-3" colspan="3"><span class="text-red-600">오류: ${error.message}</span></td>
                     `;
                     analysisBody.appendChild(errorTR);
                 }
@@ -323,7 +336,8 @@
                 return '검색된 기업 없음';
             }
             return companies.map(c => 
-                `<div><a href="${c.link}" target="_blank" class="text-blue-400 hover:underline">${c.title}</a></div>`
+                /* 6. 링크 색상 변경 */
+                `<div><a href="${c.link}" target="_blank" class="text-blue-600 hover:underline">${c.title}</a></div>`
             ).join('');
         }
 
@@ -390,13 +404,17 @@
         function updateSortArrows(activeIndex, direction) {
             const headers = document.querySelectorAll("#resultsTable thead th");
             headers.forEach((th, index) => {
-                let text = th.textContent.replace(' ▼', '').replace(' ▲', '');
-                if (index === activeIndex) {
-                    text += (direction === 'asc' ? ' ▲' : ' ▼');
-                } else if (th.onclick) {
-                    text += ' ▼'; // 기본값
+                // 6. hover 색상에 맞게 헤더 화DNI 텍스트 유지
+                let textContent = th.textContent;
+                if (th.onclick) {
+                    textContent = th.textContent.replace(' ▼', '').replace(' ▲', '');
+                    if (index === activeIndex) {
+                        textContent += (direction === 'asc' ? ' ▲' : ' ▼');
+                    } else {
+                        textContent += ' ▼'; // 기본값
+                    }
                 }
-                th.textContent = text;
+                th.textContent = textContent;
             });
         }
 
