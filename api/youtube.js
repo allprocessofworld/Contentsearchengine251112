@@ -64,9 +64,9 @@ export default async function handler(req, res) {
         const videos = videoData.items.map(item => {
             const channelId = item.snippet.channelId;
             
-            // 3. 썸네일 해상도 개선 (standard > high > medium > default)
+            // 3. 썸네일 해상도 개선 (maxres > standard > high > medium > default)
             const thumbnails = item.snippet.thumbnails;
-            const bestThumbnail = thumbnails.standard || thumbnails.high || thumbnails.medium || thumbnails.default;
+            const bestThumbnail = thumbnails.maxres || thumbnails.standard || thumbnails.high || thumbnails.medium || thumbnails.default;
             
             return {
                 videoId: item.id,
